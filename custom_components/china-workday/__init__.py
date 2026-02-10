@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {
-        'coordinator': ChinaWorkdayCoordinator(hass, entry.data['datasource'])
+        'coordinator': ChinaWorkdayCoordinator(hass)
     })
 
     await hass.data[DOMAIN]['coordinator'].async_config_entry_first_refresh()

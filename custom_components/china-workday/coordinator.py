@@ -1,16 +1,15 @@
 import datetime
+import json
 import logging
+import os
 
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.storage import Store
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class ChinaWorkdayCoordinator(DataUpdateCoordinator):
 
-    def __init__(self, hass, datasource):
+    def __init__(self, hass):
         super().__init__(
             hass,
             _LOGGER,
@@ -18,60 +17,40 @@ class ChinaWorkdayCoordinator(DataUpdateCoordinator):
             update_interval=datetime.timedelta(minutes=1)
         )
         self._hass = hass
-        self._datasource = datasource
 
     async def _async_update_data(self):
         now = datetime.datetime.now()
 
+        holidays = await self.hass.async_add_executor_job(self._load_datasource_from_file, str(now.year))
+        if holidays is None:
+            raise UpdateFailed('数据源不可用')
+
         date_key = now.strftime('%Y-%m-%d')
-        holidays = await self._get_holiday_by_cache(str(now.year))
-        for holiday in holidays:
-            if holiday['date'] == date_key:
-                return {
-                    'workday': not holiday['isOffDay'],
-                    'holiday': holiday['name']
-                }
+        if date_key in holidays:
+            holiday = holidays[date_key]
+            return {
+                'workday': not holiday['isOffDay'],
+                'holiday': holiday['name']
+            }
 
         return {
             'workday': now.weekday() not in [5, 6],
             'holiday': '',
         }
 
-    async def _get_holiday_by_cache(self, year: str):
-        """
-        从缓存中获取节假日信息，未获取到则从数据源中获取
-        :param year:
-        :return:
-        """
-        store = Store(self._hass, 1, 'china-workday/cache.json')
+    @staticmethod
+    def _load_datasource_from_file(year):
+        file_path = os.path.join(os.path.dirname(__file__), f"data/{year}.json")
+
+        if not os.path.isfile(file_path):
+            _LOGGER.error("未找到数据源文件: %s", file_path)
+            return None
 
         try:
-            cache = await store.async_load()
-            if cache is not None and year in cache:
-                return cache[year]
-        except Exception as e:
-            _LOGGER.warning("{} cache load error: {}".format(year, e))
-            await store.async_remove()
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
 
-        if cache is None:
-            cache = {}
-
-        _LOGGER.debug("get {} holiday by datasource".format(year))
-        cache[year] = await self._get_holiday_by_datasource(year)
-        await store.async_save(cache)
-
-        return cache[year]
-
-    async def _get_holiday_by_datasource(self, year: str):
-        """
-        从设置的数据源中获取节假日信息
-        :param year:
-        :return:
-        """
-        session = async_get_clientsession(self._hass)
-        async with session.get(url=self._datasource.replace('{year}', str(year))) as response:
-            content = await response.json(content_type=None)
-            if 'days' not in content:
-                raise RuntimeError('days field is missing')
-
-            return content['days']
+                return {d['date']: d for d in data.get('days', [])}
+        except (json.JSONDecodeError, KeyError) as e:
+            _LOGGER.error("数据源格式错误: %s", e)
+            return None
