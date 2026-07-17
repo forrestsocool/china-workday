@@ -19,7 +19,6 @@ class ChinaWorkdayBinarySensor(CoordinatorEntity, BinarySensorEntity):
     def __init__(self, coordinator):
         super().__init__(coordinator)
         self._attr_unique_id = '{}.{}'.format(DOMAIN, 'is_workday').lower()
-        self.entity_id = self._attr_unique_id
         self._attr_name = '是否工作日'
 
         self._update_value()

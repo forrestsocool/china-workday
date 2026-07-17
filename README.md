@@ -6,7 +6,7 @@
 
 方法1：下载并复制`custom_components/china-workday`文件夹到HomeAssistant根目录下的`custom_components`文件夹即可完成安装
 
-方法2：已经安装了HACS，可以点击按钮快速安装 [![通过HACS添加集成](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=banto6&repository=china-workday&category=integration)
+方法2：已经安装了HACS，可以点击按钮快速安装 [![通过HACS添加集成](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=forrestsocool&repository=china-workday&category=integration)
 
 ## 配置
 
@@ -27,3 +27,10 @@ logger:
 
 ## 数据来源
 - https://github.com/NateScarlet/holiday-cn
+
+## 版本
+
+### 0.0.3 (2026-07-17)
+
+- 修复 Home Assistant 2026.7 对非法实体 ID 的兼容性警告
+- 添加透明背景的本地品牌图标和 Logo
