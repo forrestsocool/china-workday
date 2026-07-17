@@ -5,7 +5,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, LEGACY_UNIQUE_ID
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class ChinaWorkdayBinarySensor(CoordinatorEntity, BinarySensorEntity):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_unique_id = '{}.{}'.format(DOMAIN, 'is_workday').lower()
+        self._attr_unique_id = LEGACY_UNIQUE_ID
         self._attr_name = '是否工作日'
 
         self._update_value()

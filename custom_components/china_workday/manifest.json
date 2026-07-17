@@ -1,7 +1,7 @@
 {
-  "domain": "china-workday",
+  "domain": "china_workday",
   "name": "China Workday",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "documentation": "https://github.com/forrestsocool/china-workday",
   "issue_tracker": "https://github.com/forrestsocool/china-workday/issues",
   "config_flow": true,

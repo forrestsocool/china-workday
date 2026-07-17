@@ -34,5 +34,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 
 async def entry_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    _LOGGER.debug('reload china-workday integration...')
+    _LOGGER.debug("reload china_workday integration...")
     await hass.config_entries.async_reload(entry.entry_id)
